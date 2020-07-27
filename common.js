@@ -130,6 +130,20 @@ const insertBulkCountDocs = async (db, docs) => {
   }
 }
 
+const measurePerfs = (nDocs, nDocsPerQuery) => {
+  const obs = new PerformanceObserver(items => {
+    const itemName = items.getEntries()[0].name
+    let duration = items.getEntries()[0].duration
+    if (itemName.startsWith('MeanQuery')) {
+      // Compute the mean of all the query runs
+      duration = duration / (nDocs / nDocsPerQuery)
+    }
+    console.log(itemName + ' : ' + duration + ' ms')
+  })
+  obs.observe({ entryTypes: ['measure'] })
+  return obs
+}
+
 module.exports = {
   createDb,
   createViewJs,
@@ -142,5 +156,6 @@ module.exports = {
   createCountIndex,
   queryRangeCountMango,
   queryRangeCountViewJs,
-  queryRangeCountViewErlang
+  queryRangeCountViewErlang,
+  measurePerfs
 }

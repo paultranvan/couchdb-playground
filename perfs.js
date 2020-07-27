@@ -1,5 +1,5 @@
 const nano = require('nano')('http://localhost:5984')
-const { PerformanceObserver, performance } = require('perf_hooks')
+const { performance } = require('perf_hooks')
 
 const {
   createDb,
@@ -10,22 +10,13 @@ const {
   createCountIndex,
   queryRangeCountMango,
   queryRangeCountViewJs,
-  queryRangeCountViewErlang
+  queryRangeCountViewErlang,
+  measurePerfs
 } = require('./common')
 
 const DB_NAME = 'nano-test-perfs'
 const N_DOCS = 500000
 const DOCS_PER_QUERY = 100
-
-const obs = new PerformanceObserver(items => {
-  const itemName = items.getEntries()[0].name
-  let duration = items.getEntries()[0].duration
-  if (itemName.startsWith('MeanQuery')) {
-    // Compute the mean of all the query runs
-    duration = duration / (N_DOCS / DOCS_PER_QUERY)
-  }
-  console.log(itemName + ' : ' + duration + ' ms')
-})
 
 /**
  * Measure CouchDB performances.
@@ -38,7 +29,8 @@ const obs = new PerformanceObserver(items => {
 const main = async () => {
   await createDb(DB_NAME)
   const db = nano.db.use(DB_NAME)
-  obs.observe({ entryTypes: ['measure'] })
+
+  measurePerfs(N_DOCS, DOCS_PER_QUERY)
 
   // Insert docs
   const docs = await buildDocs(N_DOCS)
