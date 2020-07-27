@@ -1,6 +1,8 @@
 # couchdb-playground
 
-## Run
+## Run example
 
-`yarn`
-`node perfs.js`
+```
+yarn
+node perfs.js
+```
