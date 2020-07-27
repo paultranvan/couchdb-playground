@@ -32,10 +32,11 @@ const createViewJs = async db => {
 const createViewErlang = async db => {
   const designDoc = {
     _id: '_design/by-count-erlang',
-    language: 'javascript',
+    language: 'erlang',
     views: {
       'by-count': {
-        map: '\nfunction(doc) {\n  emit(doc.count2, null);\n }',
+        map:
+          '\nfun({Doc}) ->\r\n K = proplists:get_value(<<"count2">>, Doc, null),\r\n Emit(K, null)\r\nend.',
         reduce: '_sum'
       }
     }
