@@ -1,7 +1,7 @@
 const nano = require('nano')('http://localhost:5984')
 const { createDb, createCountDoc } = require('./common')
 
-const DB_NAME = 'nano-test-db'
+const DB_NAME = 'nano-test-conflicts-db'
 
 // This creates a branch conflict with Pouch 7.1.1, but not with Couch
 const updateBulkSameDoc = async (db, doc) => {
