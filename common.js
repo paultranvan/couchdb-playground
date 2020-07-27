@@ -1,4 +1,5 @@
 const nano = require('nano')('http://localhost:5984')
+const { PerformanceObserver } = require('perf_hooks')
 
 const createDb = async dbName => {
   try {
@@ -144,6 +145,16 @@ const measurePerfs = (nDocs, nDocsPerQuery) => {
   return obs
 }
 
+const replicate = async (sourceDb, targetDb) => {
+  const sourceInfo = await sourceDb.info()
+  const sourceName = sourceInfo.db_name
+
+  const targetInfo = await targetDb.info()
+  const targetName = targetInfo.db_name
+
+  return nano.db.replicate(sourceName, targetName)
+}
+
 module.exports = {
   createDb,
   createViewJs,
@@ -157,5 +168,6 @@ module.exports = {
   queryRangeCountMango,
   queryRangeCountViewJs,
   queryRangeCountViewErlang,
-  measurePerfs
+  measurePerfs,
+  replicate
 }
