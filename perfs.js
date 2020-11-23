@@ -5,8 +5,8 @@ const {
   createDb,
   createViewJs,
   createViewErlang,
-  buildDocs,
-  insertBulkCountDocs,
+  buildCountDocs,
+  insertBulkDocs,
   createCountIndex,
   queryRangeCountMango,
   queryRangeCountViewJs,
@@ -33,10 +33,10 @@ const main = async () => {
   measurePerfs(N_DOCS, DOCS_PER_QUERY)
 
   // Insert docs
-  const docs = await buildDocs(N_DOCS)
+  const docs = buildCountDocs(N_DOCS)
   console.log('insert ' + N_DOCS + ' docs...')
   performance.mark('SI')
-  await insertBulkCountDocs(db, docs)
+  await insertBulkDocs(db, docs)
   performance.mark('EI')
   performance.measure('Insertion', 'SI', 'EI')
 
