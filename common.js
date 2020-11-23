@@ -63,6 +63,18 @@ const createCountIndex = async db => {
   return db.createIndex(indexDef)
 }
 
+const createIndex = async (db, fields, { name, ddoc, partialIndex }) => {
+  const indexDef = {
+    index: {
+      partial_filter_selector: partialIndex,
+      fields
+    },
+    name,
+    ddoc
+  }
+  return db.createIndex(indexDef)
+}
+
 const queryRangeCountMango = async (db, minCount, maxCount) => {
   const params = {
     selector: {
@@ -101,7 +113,7 @@ const queryById = async (db, docid) => {
   return db.get(docid)
 }
 
-const buildDocs = async nDocs => {
+const buildCountDocs = nDocs => {
   const docs = []
   for (let i = 0; i < nDocs; i++) {
     docs.push({
@@ -112,14 +124,13 @@ const buildDocs = async nDocs => {
   return docs
 }
 
-const insertBulkCountDocs = async (db, docs) => {
+const insertBulkDocs = async (db, docs) => {
   const nDocs = docs.length
   if (nDocs > 100000) {
     // Do not insert too many docs in one bulk to avoid timeouts
     const interval = nDocs / 100000
     for (let i = 0; i < interval; i++) {
       const partialDocs = docs.slice(i * 100000, (i + 1) * 100000)
-      console.log('partial docs : ', partialDocs.length)
       await db.bulk({
         docs: partialDocs
       })
@@ -145,6 +156,18 @@ const measurePerfs = (nDocs, nDocsPerQuery) => {
   return obs
 }
 
+const measurePerfsByMeanRuns = nRuns => {
+  const obs = new PerformanceObserver(items => {
+    const itemName = items.getEntries()[0].name
+    let duration = items.getEntries()[0].duration
+    // Compute the mean of all the query runs
+    duration = duration / nRuns
+    console.log(itemName + ' : ' + duration + ' ms')
+  })
+  obs.observe({ entryTypes: ['measure'] })
+  return obs
+}
+
 const replicate = async (sourceDb, targetDb) => {
   const sourceInfo = await sourceDb.info()
   const sourceName = sourceInfo.db_name
@@ -162,12 +185,14 @@ module.exports = {
   queryById,
   getAllCountDocs,
   createCountDoc,
-  buildDocs,
-  insertBulkCountDocs,
+  buildCountDocs,
+  insertBulkDocs,
   createCountIndex,
   queryRangeCountMango,
   queryRangeCountViewJs,
   queryRangeCountViewErlang,
   measurePerfs,
-  replicate
+  measurePerfsByMeanRuns,
+  replicate,
+  createIndex
 }
